@@ -118,7 +118,7 @@ export async function updateClientOrder(uid: string, clientId: string, newOrder:
 export async function updateClient(
   uid: string,
   clientId: string,
-  clientName: string,
+  _clientName: string,
   data: Record<string, unknown>
 ) {
   const batch = writeBatch(db);

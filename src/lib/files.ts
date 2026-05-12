@@ -1,4 +1,4 @@
-import { collection, doc, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { doc, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { addActivityEntry } from './activityLog';
 import { deleteStorageFile } from './storage';

@@ -11,7 +11,6 @@ import {
   ChevronDown,
   ChevronRight,
   X,
-  Image,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -420,10 +419,10 @@ export function FilesTab({ clientId, clientName }: FilesTabProps) {
   // -------------------------------------------------------------------------
 
   const onDrop = useCallback(
-    (accepted: File[], rejected: Parameters<Parameters<typeof useDropzone>[0]['onDrop'] & {}>[1]) => {
+    (accepted: File[], rejected: { errors: readonly { message: string }[] }[]) => {
       if (rejected && rejected.length > 0) {
         const reasons = rejected
-          .map(r => r.errors.map((e: { message: string }) => e.message).join(', '))
+          .map((r) => r.errors.map((e) => e.message).join(', '))
           .slice(0, 3)
           .join('; ');
         toast.error(`Some files were rejected: ${reasons}`);

@@ -23,7 +23,7 @@ import { Label } from '@/components/ui/label';
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
-  date: z.date({ required_error: 'Date is required' }),
+  date: z.date({ error: 'Date is required' }),
 });
 
 type FormValues = z.infer<typeof schema>;

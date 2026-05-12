@@ -29,7 +29,7 @@ import { Separator } from '@/components/ui/separator';
 
 const schema = z.object({
   invoiceNumber: z.string().min(1, 'Invoice number is required'),
-  date: z.date({ required_error: 'Invoice date is required' }),
+  date: z.date({ error: 'Invoice date is required' }),
   dueDate: z.date().optional().nullable(),
   paymentTerms: z.string().optional(),
   lineItems: z

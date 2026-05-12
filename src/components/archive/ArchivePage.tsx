@@ -125,7 +125,6 @@ export function ArchivePage() {
 
     try {
       const clientId = client.id!;
-      const basePath = `users/${user.uid}/clients/${clientId}`;
 
       // 1. Delete milestones (individual deletes trigger Cloud Function for calendar cleanup)
       const milestonesSnap = await getDocs(
