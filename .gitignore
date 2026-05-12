@@ -23,5 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
+.env
+.env.*
+
+# Firebase
+.firebase/
+functions/lib/
+
 # Playwright MCP artifacts
 .playwright-mcp/
