@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   DndContext,
   DragOverlay,
-  closestCorner,
+  closestCorners,
   type DragStartEvent,
   type DragEndEvent,
   PointerSensor,
@@ -106,7 +106,7 @@ export function PipelineBoard({ clientsByStage }: PipelineBoardProps) {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorner}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
