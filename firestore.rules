@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Ownership check
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Verify required fields exist in incoming data
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // Restrict updates to only the specified fields
+    function onlyUpdates(allowedFields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
+    }
+
+    // User document creation validation
+    function isValidUserCreate() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'createdAt'])
+        && data.uid == request.auth.uid;
+    }
+
+    // User document update validation
+    function isValidUserUpdate() {
+      let diff = request.resource.data.diff(resource.data).affectedKeys();
+      return !diff.hasAny(['uid', 'createdAt']);
+    }
+
+    // Client creation validation
+    function isValidClientCreate() {
+      return request.resource.data.keys().hasAll(['name', 'stage', 'createdAt', 'lastActivityAt', 'archived'])
+        && request.resource.data.stage in ['lead', 'consultation', 'proposal', 'active_design', 'installation', 'complete']
+        && request.resource.data.archived == false;
+    }
+
+    // File metadata creation validation
+    function isValidFileCreate() {
+      return request.resource.data.keys().hasAll(['name', 'folder', 'mimeType', 'sizeBytes', 'storagePath', 'uploadedAt'])
+        && request.resource.data.folder in ['photos', 'documents', 'designs'];
+    }
+
+    // User document
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUserCreate();
+      allow update: if isOwner(uid) && isValidUserUpdate();
+      allow delete: if false;
+
+      // Private subcollection for tokens
+      match /private/{docId} {
+        allow read: if false;
+        allow create: if isOwner(uid);
+        allow update: if isOwner(uid);
+        allow delete: if isOwner(uid);
+      }
+
+      // Clients
+      match /clients/{clientId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidClientCreate();
+        allow update: if isOwner(uid);
+        allow delete: if isOwner(uid);
+
+        // Notes
+        match /notes/{noteId} {
+          allow read: if isOwner(uid);
+          allow create: if isOwner(uid) && hasRequiredFields(['content']);
+          allow update: if isOwner(uid) && onlyUpdates(['content', 'updatedAt']);
+          allow delete: if false;
+        }
+
+        // Files (metadata)
+        match /files/{fileId} {
+          allow read: if isOwner(uid);
+          allow create: if isOwner(uid) && isValidFileCreate();
+          allow update: if isOwner(uid) && onlyUpdates(['thumbnailPath']);
+          allow delete: if isOwner(uid);
+        }
+
+        // Invoices
+        match /invoices/{invoiceId} {
+          allow read: if isOwner(uid);
+          allow create: if isOwner(uid);
+          allow update: if isOwner(uid);
+          allow delete: if isOwner(uid);
+        }
+
+        // Milestones
+        match /milestones/{milestoneId} {
+          allow read: if isOwner(uid);
+          allow create: if isOwner(uid) && hasRequiredFields(['title', 'date']);
+          allow update: if isOwner(uid);
+          allow delete: if isOwner(uid);
+        }
+      }
+
+      // Activity Log
+      match /activityLog/{activityId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && hasRequiredFields(['clientId', 'type', 'description']);
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
