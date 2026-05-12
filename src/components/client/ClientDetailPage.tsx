@@ -1,16 +1,29 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { writeBatch, doc, serverTimestamp } from 'firebase/firestore';
+import {
+  writeBatch,
+  doc,
+  serverTimestamp,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  deleteDoc,
+} from 'firebase/firestore';
 import {
   ArrowLeft,
   MoreVertical,
   Pencil,
   Archive,
+  ArchiveRestore,
+  Trash2,
   Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import {
   Tabs,
   TabsContent,
@@ -21,6 +34,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -32,6 +46,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { db } from '@/lib/firebase';
+import { deleteStorageFile } from '@/lib/storage';
 import { addActivityEntry } from '@/lib/activityLog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClient } from '@/hooks/useClient';
@@ -43,6 +58,14 @@ import { FilesTab } from '@/components/client/FilesTab';
 import { InvoicesTab } from '@/components/client/InvoicesTab';
 import { MilestonesTab } from '@/components/client/MilestonesTab';
 
+function chunkArray<T>(arr: T[], maxSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += maxSize) {
+    chunks.push(arr.slice(i, i + maxSize));
+  }
+  return chunks;
+}
+
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
@@ -52,6 +75,11 @@ export function ClientDetailPage() {
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [editMode, setEditMode] = useState(false);
+
+  // Archived-client actions
+  const [restoring, setRestoring] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleArchive = async () => {
     if (!user || !client?.id) return;
@@ -73,6 +101,119 @@ export function ClientDetailPage() {
       setArchiving(false);
     }
     setArchiveDialogOpen(false);
+  };
+
+  const handleRestore = async () => {
+    if (!user || !client?.id) return;
+    setRestoring(true);
+    try {
+      // Get max stageOrder in target stage
+      const stageQuery = query(
+        collection(db, 'users', user.uid, 'clients'),
+        where('stage', '==', client.stage),
+        where('archived', '==', false),
+        orderBy('stageOrder', 'desc')
+      );
+      let maxOrder = 0;
+      try {
+        const snap = await getDocs(stageQuery);
+        if (!snap.empty) maxOrder = snap.docs[0].data().stageOrder || 0;
+      } catch {
+        // Index not ready
+      }
+
+      const batch = writeBatch(db);
+      const clientRef = doc(db, 'users', user.uid, 'clients', client.id);
+      batch.update(clientRef, {
+        archived: false,
+        stageOrder: maxOrder + 1,
+        lastActivityAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      addActivityEntry(
+        batch,
+        user.uid,
+        client.id,
+        client.name,
+        'client_restored',
+        'Client restored from archive'
+      );
+      await batch.commit();
+      toast.success(`${client.name} restored to pipeline`);
+      navigate('/');
+    } catch {
+      toast.error('Failed to restore client');
+      setRestoring(false);
+    }
+  };
+
+  const handlePermanentDelete = async () => {
+    if (!user || !client?.id) return;
+    setDeleting(true);
+    const clientId = client.id;
+
+    try {
+      // 1. Delete milestones individually (triggers Cloud Function for calendar cleanup)
+      const milestonesSnap = await getDocs(
+        collection(db, 'users', user.uid, 'clients', clientId, 'milestones')
+      );
+      for (const milestoneDoc of milestonesSnap.docs) {
+        await deleteDoc(milestoneDoc.ref);
+      }
+
+      // 2. Delete notes in batches
+      const notesSnap = await getDocs(
+        collection(db, 'users', user.uid, 'clients', clientId, 'notes')
+      );
+      for (const chunk of chunkArray(notesSnap.docs, 500)) {
+        const batch = writeBatch(db);
+        chunk.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+
+      // 3. Delete files: Storage first, then Firestore
+      const filesSnap = await getDocs(
+        collection(db, 'users', user.uid, 'clients', clientId, 'files')
+      );
+      for (const fileDoc of filesSnap.docs) {
+        const data = fileDoc.data();
+        if (data.storagePath) await deleteStorageFile(data.storagePath);
+        if (data.thumbnailPath) await deleteStorageFile(data.thumbnailPath);
+        await deleteDoc(fileDoc.ref);
+      }
+
+      // 4. Delete invoices in batches
+      const invoicesSnap = await getDocs(
+        collection(db, 'users', user.uid, 'clients', clientId, 'invoices')
+      );
+      for (const chunk of chunkArray(invoicesSnap.docs, 500)) {
+        const batch = writeBatch(db);
+        chunk.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+
+      // 5. Delete activity log entries for this client
+      const activitySnap = await getDocs(
+        query(
+          collection(db, 'users', user.uid, 'activityLog'),
+          where('clientId', '==', clientId)
+        )
+      );
+      for (const chunk of chunkArray(activitySnap.docs, 500)) {
+        const batch = writeBatch(db);
+        chunk.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+
+      // 6. Delete the client document itself
+      await deleteDoc(doc(db, 'users', user.uid, 'clients', clientId));
+
+      toast.success('Client permanently deleted');
+      navigate('/archive');
+    } catch {
+      toast.error('Failed to delete client');
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -98,44 +239,99 @@ export function ClientDetailPage() {
     );
   }
 
+  const isArchived = client.archived;
+
   return (
     <div className="max-w-4xl space-y-4">
       {/* Back link */}
-      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="-ml-2">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate(isArchived ? '/archive' : -1 as unknown as string)}
+        className="-ml-2"
+      >
         <ArrowLeft className="h-4 w-4 mr-1.5" />
-        Back
+        {isArchived ? 'Back to Archive' : 'Back'}
       </Button>
 
       {/* Header row */}
       <div className="flex items-center gap-3 flex-wrap">
-        <h1 className="text-xl font-semibold flex-1 min-w-0 truncate">{client.name}</h1>
-        <StageSelector
-          clientId={client.id!}
-          clientName={client.name}
-          currentStage={client.stage}
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Actions</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setEditMode(true)}>
-              <Pencil className="h-3.5 w-3.5 mr-2" />
-              Edit Client
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => setArchiveDialogOpen(true)}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <h1 className="text-xl font-semibold truncate">{client.name}</h1>
+          {isArchived && (
+            <Badge variant="secondary" className="shrink-0">Archived</Badge>
+          )}
+        </div>
+
+        {!isArchived && (
+          <StageSelector
+            clientId={client.id!}
+            clientName={client.name}
+            currentStage={client.stage}
+          />
+        )}
+
+        {isArchived ? (
+          /* Archived client actions: Restore + Delete */
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRestore}
+              disabled={restoring}
+              className="gap-1.5"
             >
-              <Archive className="h-3.5 w-3.5 mr-2" />
-              Archive
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {restoring ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ArchiveRestore className="h-3.5 w-3.5" />
+              )}
+              Restore
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(true)}
+              disabled={restoring}
+              className="gap-1.5"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </div>
+        ) : (
+          /* Active client actions dropdown */
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditMode(true)}>
+                <Pencil className="h-3.5 w-3.5 mr-2" />
+                Edit Client
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setArchiveDialogOpen(true)}
+              >
+                <Archive className="h-3.5 w-3.5 mr-2" />
+                Archive
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
+
+      {/* Archived banner */}
+      {isArchived && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          This client is archived and hidden from the pipeline. Restore them to resume working on their project.
+        </div>
+      )}
 
       {/* Summary strip */}
       <ClientSummaryStrip client={client} />
@@ -186,6 +382,41 @@ export function ClientDetailPage() {
             </Button>
             <Button variant="destructive" onClick={handleArchive} disabled={archiving}>
               {archiving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Archive'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Permanent delete confirmation dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={(open) => !open && !deleting && setDeleteDialogOpen(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Permanently delete {client.name}?</DialogTitle>
+            <DialogDescription>
+              This will delete all notes, files, invoices, milestones, and calendar events. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handlePermanentDelete}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting…
+                </>
+              ) : (
+                'Delete permanently'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
