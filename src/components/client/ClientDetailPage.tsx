@@ -41,6 +41,7 @@ import { OverviewTab } from '@/components/client/OverviewTab';
 import { NotesTab } from '@/components/client/NotesTab';
 import { FilesTab } from '@/components/client/FilesTab';
 import { InvoicesTab } from '@/components/client/InvoicesTab';
+import { MilestonesTab } from '@/components/client/MilestonesTab';
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -166,7 +167,7 @@ export function ClientDetailPage() {
         </TabsContent>
 
         <TabsContent value="milestones">
-          <p className="text-sm text-muted-foreground italic">Milestones coming soon.</p>
+          <MilestonesTab clientId={client.id!} clientName={client.name} />
         </TabsContent>
       </Tabs>
 

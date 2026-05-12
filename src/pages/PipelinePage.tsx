@@ -6,10 +6,16 @@ import { PipelineBoard } from '@/components/pipeline/PipelineBoard';
 import { MobilePipelineList } from '@/components/pipeline/MobilePipelineList';
 import { AddClientSheet } from '@/components/pipeline/AddClientSheet';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { NeedsAttentionBanner } from '@/components/shared/NeedsAttentionBanner';
 import { useClients } from '@/hooks/useClients';
+import { useNeedsAttention } from '@/hooks/useNeedsAttention';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function PipelinePage() {
+  const { userDoc } = useAuth();
   const { clients, clientsByStage, loading } = useClients();
+  const stalenessThreshold = userDoc?.settings?.stalenessThresholdDays ?? 14;
+  const { attentionClients } = useNeedsAttention(clients, stalenessThreshold);
   const [addOpen, setAddOpen] = useState(false);
 
   if (loading) {
@@ -41,6 +47,10 @@ export function PipelinePage() {
           <Plus className="h-4 w-4 mr-1" /> Add Client
         </Button>
       </div>
+
+      {attentionClients.length > 0 && (
+        <NeedsAttentionBanner attentionClients={attentionClients} />
+      )}
 
       {!hasClients ? (
         <EmptyState
