@@ -8,46 +8,44 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand palette
-        primary: {
-          DEFAULT: 'hsl(215, 70%, 45%)',
-          foreground: 'hsl(0, 0%, 100%)',
-          hover: 'hsl(215, 70%, 38%)',
-        },
-        // Semantic palette
-        background: 'hsl(0, 0%, 99%)',
+        // shadcn/ui semantic tokens — all use CSS variables for opacity modifier support
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
         card: {
-          DEFAULT: 'hsl(0, 0%, 100%)',
-          foreground: 'hsl(222, 47%, 11%)',
-        },
-        muted: {
-          DEFAULT: 'hsl(210, 20%, 96%)',
-          foreground: 'hsl(215, 15%, 47%)',
-        },
-        border: 'hsl(214, 20%, 90%)',
-        foreground: 'hsl(222, 47%, 11%)',
-        destructive: {
-          DEFAULT: 'hsl(0, 72%, 51%)',
-          foreground: 'hsl(0, 0%, 100%)',
-        },
-        success: 'hsl(142, 71%, 35%)',
-        warning: 'hsl(38, 92%, 50%)',
-        // shadcn/ui semantic tokens (CSS variable-based)
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))',
         },
-        // Pipeline stage colors
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        // App-specific semantic colors (not used with opacity modifiers)
+        success: 'hsl(142, 71%, 35%)',
+        warning: 'hsl(38, 92%, 50%)',
+        // Pipeline stage colors (used for top borders, not with opacity modifiers)
         stage: {
           lead: 'hsl(210, 50%, 70%)',
           consultation: 'hsl(175, 45%, 55%)',
