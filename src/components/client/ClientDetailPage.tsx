@@ -39,6 +39,8 @@ import { StageSelector } from '@/components/shared/StageSelector';
 import { ClientSummaryStrip } from '@/components/client/ClientSummaryStrip';
 import { OverviewTab } from '@/components/client/OverviewTab';
 import { NotesTab } from '@/components/client/NotesTab';
+import { FilesTab } from '@/components/client/FilesTab';
+import { InvoicesTab } from '@/components/client/InvoicesTab';
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -156,11 +158,11 @@ export function ClientDetailPage() {
         </TabsContent>
 
         <TabsContent value="files">
-          <p className="text-sm text-muted-foreground italic">Files coming soon.</p>
+          <FilesTab clientId={client.id!} clientName={client.name} />
         </TabsContent>
 
         <TabsContent value="invoices">
-          <p className="text-sm text-muted-foreground italic">Invoices coming soon.</p>
+          <InvoicesTab clientId={client.id!} clientName={client.name} />
         </TabsContent>
 
         <TabsContent value="milestones">
