@@ -22,14 +22,14 @@ export function PipelinePage() {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold">Pipeline</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-tight">Pipeline</h1>
         </div>
         <div className="grid grid-cols-6 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="space-y-3">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-8 w-full rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
             </div>
           ))}
         </div>
@@ -42,7 +42,7 @@ export function PipelinePage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold">Pipeline</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-tight">Pipeline</h1>
         <Button onClick={() => setAddOpen(true)}>
           <Plus className="h-4 w-4 mr-1" /> Add Client
         </Button>

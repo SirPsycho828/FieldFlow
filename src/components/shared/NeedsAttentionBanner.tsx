@@ -27,8 +27,8 @@ export function NeedsAttentionBanner({
     <div
       className="rounded-lg border-l-4 p-4 mb-6"
       style={{
-        backgroundColor: 'hsl(38, 92%, 50%, 0.08)',
-        borderLeftColor: 'hsl(38, 92%, 50%)',
+        backgroundColor: 'hsl(38, 80%, 50%, 0.08)',
+        borderLeftColor: 'hsl(38, 80%, 50%)',
       }}
     >
       {/* Header row */}
@@ -38,7 +38,7 @@ export function NeedsAttentionBanner({
             className="h-4 w-4 shrink-0"
             style={{ color: 'hsl(38, 92%, 50%)' }}
           />
-          <span className="text-sm font-semibold">
+          <span className="text-sm font-heading font-bold">
             {attentionClients.length}{' '}
             {attentionClients.length === 1 ? 'client' : 'clients'} need
             {attentionClients.length === 1 ? 's' : ''} attention

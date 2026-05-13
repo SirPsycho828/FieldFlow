@@ -7,8 +7,12 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ['Merriweather', 'Georgia', 'serif'],
+        body: ['Cabin', 'system-ui', 'sans-serif'],
+      },
       colors: {
-        // shadcn/ui semantic tokens — all use CSS variables for opacity modifier support
+        // shadcn/ui semantic tokens
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -42,23 +46,31 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        // App-specific semantic colors (not used with opacity modifiers)
-        success: 'hsl(142, 71%, 35%)',
-        warning: 'hsl(38, 92%, 50%)',
-        // Pipeline stage colors (used for top borders, not with opacity modifiers)
+        // App semantic colors
+        success: 'hsl(143, 40%, 38%)',
+        warning: 'hsl(38, 80%, 50%)',
+        terracotta: 'hsl(21, 54%, 49%)',
+        stone: 'hsl(33, 7%, 61%)',
+        // Pipeline stage colors (harmonized with Terra Firma)
         stage: {
-          lead: 'hsl(210, 50%, 70%)',
-          consultation: 'hsl(175, 45%, 55%)',
-          proposal: 'hsl(45, 65%, 58%)',
-          'active-design': 'hsl(260, 45%, 62%)',
-          installation: 'hsl(25, 60%, 55%)',
-          complete: 'hsl(142, 45%, 48%)',
+          lead: 'hsl(143, 25%, 65%)',
+          consultation: 'hsl(175, 30%, 50%)',
+          proposal: 'hsl(42, 50%, 55%)',
+          'active-design': 'hsl(21, 40%, 55%)',
+          installation: 'hsl(28, 45%, 48%)',
+          complete: 'hsl(143, 40%, 40%)',
         },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        xl: 'var(--shadow-xl)',
       },
     },
   },

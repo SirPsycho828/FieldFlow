@@ -48,7 +48,7 @@ export function PipelineColumn({ stage, clients }: PipelineColumnProps) {
   return (
     <div className={`flex flex-col min-w-[200px] border-t-[3px] ${STAGE_COLORS[stage]} bg-background rounded-lg`}>
       <div className="p-3 flex items-center gap-2">
-        <h2 className="text-sm font-semibold">{STAGE_LABELS[stage]}</h2>
+        <h2 className="font-heading text-sm font-bold">{STAGE_LABELS[stage]}</h2>
         <Badge variant="secondary" className="text-xs">{clients.length}</Badge>
       </div>
       <div ref={setNodeRef} className="flex-1 overflow-y-auto p-2 pt-0 space-y-3 min-h-[100px]">

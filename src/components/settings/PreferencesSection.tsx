@@ -61,7 +61,7 @@ export function PreferencesSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Preferences</CardTitle>
+        <CardTitle className="font-heading text-base font-bold">Preferences</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
