@@ -212,7 +212,7 @@ export function ArchivePage() {
   if (loading) {
     return (
       <div className="max-w-2xl space-y-4">
-        <h1 className="text-xl font-semibold">Archive</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-tight">Archive</h1>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
@@ -224,7 +224,7 @@ export function ArchivePage() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <h1 className="text-xl font-semibold">Archive</h1>
+      <h1 className="font-heading text-2xl font-bold tracking-tight">Archive</h1>
 
       {clients.length === 0 ? (
         <EmptyState

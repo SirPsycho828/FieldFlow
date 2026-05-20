@@ -188,7 +188,7 @@ export function CalendarSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
+        <CardTitle className="font-heading text-base font-bold flex items-center gap-2">
           <CalendarDays className="h-4 w-4" />
           Google Calendar
         </CardTitle>

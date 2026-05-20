@@ -1,38 +1,50 @@
+/* Design System — FieldFlow (Terra Firma) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 222 47% 11%;
+    /* Typography */
+    --font-heading: 'Merriweather', Georgia, serif;
+    --font-body: 'Cabin', system-ui, sans-serif;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    /* Colors */
+    --background: 34 36% 95%;
+    --foreground: 24 23% 14%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --card: 40 33% 99%;
+    --card-foreground: 24 23% 14%;
 
-    --primary: 215 70% 45%;
+    --popover: 40 33% 99%;
+    --popover-foreground: 24 23% 14%;
+
+    --primary: 143 34% 33%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 34 22% 91%;
+    --secondary-foreground: 24 23% 14%;
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 15% 47%;
+    --muted: 34 18% 91%;
+    --muted-foreground: 33 10% 40%;
 
-    --accent: 210 20% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 21 54% 49%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 215 70% 45%;
+    --border: 34 16% 86%;
+    --input: 34 16% 83%;
+    --ring: 143 34% 33%;
 
     --radius: 0.5rem;
+
+    /* Shadows (warm-toned) */
+    --shadow-sm: 0 1px 3px hsl(34 20% 40% / 0.06);
+    --shadow-md: 0 4px 12px hsl(34 20% 40% / 0.08);
+    --shadow-lg: 0 8px 24px hsl(34 20% 40% / 0.10);
+    --shadow-xl: 0 16px 48px hsl(34 20% 40% / 0.14);
   }
 
   * {
@@ -41,6 +53,44 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Scroll-triggered entrance animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sonner toast customization */
+[data-sonner-toaster] [data-sonner-toast] {
+  font-family: var(--font-body);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
 }

@@ -17,7 +17,7 @@ export function MobilePipelineList({ clientsByStage }: MobilePipelineListProps) 
         return (
           <div key={stage}>
             <div className="flex items-center gap-2 mb-2">
-              <h2 className="text-sm font-semibold">{STAGE_LABELS[stage]}</h2>
+              <h2 className="font-heading text-sm font-bold">{STAGE_LABELS[stage]}</h2>
               <Badge variant="secondary" className="text-xs">{clients.length}</Badge>
             </div>
             {clients.length === 0 ? (
@@ -27,7 +27,7 @@ export function MobilePipelineList({ clientsByStage }: MobilePipelineListProps) 
                 {clients.map((client) => (
                   <Card
                     key={client.id}
-                    className="p-3 cursor-pointer hover:bg-muted/50 transition-all duration-150"
+                    className="p-3 cursor-pointer hover:shadow-md transition-all duration-150 rounded-lg"
                     onClick={() => navigate(`/clients/${client.id}`)}
                   >
                     <h3 className="text-sm font-semibold">{client.name}</h3>

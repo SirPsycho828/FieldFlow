@@ -17,8 +17,8 @@ export function ClientCard({ client, isDragging }: ClientCardProps) {
 
   return (
     <Card
-      className={`p-3 cursor-pointer border border-border bg-card transition-all duration-150 ease-out
-        ${isDragging ? 'shadow-md z-50 rotate-1' : 'hover:bg-muted/50 hover:shadow-sm hover:-translate-y-0.5'}
+      className={`p-3 cursor-pointer border border-border bg-card transition-all duration-150 ease-out rounded-lg
+        ${isDragging ? 'shadow-lg z-50 rotate-1' : 'hover:shadow-md hover:-translate-y-0.5'}
       `}
       onClick={() => !isDragging && navigate(`/clients/${client.id}`)}
       role="button"

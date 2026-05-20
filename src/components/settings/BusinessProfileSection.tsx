@@ -154,7 +154,7 @@ export function BusinessProfileSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Business Profile</CardTitle>
+        <CardTitle className="font-heading text-base font-bold">Business Profile</CardTitle>
         <p className="text-sm text-muted-foreground">
           Your business details appear on invoice PDFs
         </p>

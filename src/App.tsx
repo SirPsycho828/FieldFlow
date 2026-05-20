@@ -3,6 +3,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { LoginPage } from '@/components/auth/LoginPage';
+import { LandingRoute } from '@/pages/LandingRoute';
 import { AppShell } from '@/components/layout/AppShell';
 import { PipelinePage } from '@/pages/PipelinePage';
 import { ClientDetailPage } from '@/pages/ClientDetailPage';
@@ -14,6 +15,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<LandingRoute />} />
           <Route path="/login" element={<LoginPage />} />
           <Route
             element={
@@ -22,12 +24,12 @@ function App() {
               </AuthGuard>
             }
           >
-            <Route index element={<PipelinePage />} />
+            <Route path="/pipeline" element={<PipelinePage />} />
             <Route path="/clients/:clientId" element={<ClientDetailPage />} />
             <Route path="/archive" element={<ArchivePage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster position="bottom-right" richColors />
       </AuthProvider>
