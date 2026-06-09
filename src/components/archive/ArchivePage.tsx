@@ -30,6 +30,8 @@ import { deleteStorageFile } from '@/lib/storage';
 import { addActivityEntry } from '@/lib/activityLog';
 import { useAuth } from '@/contexts/AuthContext';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { PageIntro } from '@/components/ux/PageIntro';
+import { GuidanceTip } from '@/components/ux/GuidanceTip';
 import type { ClientDocument } from '@/types';
 import { STAGE_LABELS } from '@/types';
 
@@ -224,7 +226,22 @@ export function ArchivePage() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <h1 className="font-heading text-2xl font-bold tracking-tight">Archive</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-heading text-2xl font-bold tracking-tight">Archive</h1>
+        {clients.length > 0 && (
+          <span className="text-sm text-muted-foreground">
+            {clients.length} {clients.length === 1 ? 'client' : 'clients'}
+          </span>
+        )}
+      </div>
+      <PageIntro>
+        Archived clients are hidden from the pipeline. Restore them to resume a project, or delete permanently.
+      </PageIntro>
+      {clients.length > 0 && (
+        <GuidanceTip id="archive-actions">
+          Restore returns a client to their previous pipeline stage. Permanent delete removes all data including notes, files, invoices, and milestones.
+        </GuidanceTip>
+      )}
 
       {clients.length === 0 ? (
         <EmptyState

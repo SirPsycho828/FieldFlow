@@ -31,9 +31,10 @@ type FormData = z.infer<typeof schema>;
 interface AddClientSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreated?: (clientId: string, clientName: string) => void;
 }
 
-export function AddClientSheet({ open, onOpenChange }: AddClientSheetProps) {
+export function AddClientSheet({ open, onOpenChange, onCreated }: AddClientSheetProps) {
   const { user } = useAuth();
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -43,16 +44,16 @@ export function AddClientSheet({ open, onOpenChange }: AddClientSheetProps) {
   const onSubmit = async (data: FormData) => {
     if (!user) return;
     try {
-      await createClient(user.uid, {
+      const newId = await createClient(user.uid, {
         name: data.name,
         email: data.email || null,
         phone: data.phone || null,
         stage: data.stage,
         source: data.source || null,
       });
-      toast.success('Client added');
       form.reset();
       onOpenChange(false);
+      onCreated?.(newId, data.name);
     } catch {
       toast.error('Failed to create client');
     }

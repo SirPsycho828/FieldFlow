@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 import { UserMenu } from './UserMenu';
 
 const navItems = [
-  { label: 'Pipeline', icon: Kanban, path: '/pipeline' },
-  { label: 'Archive', icon: Archive, path: '/archive' },
-  { label: 'Settings', icon: Settings, path: '/settings' },
+  { label: 'Pipeline', icon: Kanban, path: '/pipeline', tourId: 'nav-pipeline' },
+  { label: 'Archive', icon: Archive, path: '/archive', tourId: 'nav-archive' },
+  { label: 'Settings', icon: Settings, path: '/settings', tourId: 'nav-settings' },
 ];
 
 interface SidebarNavItemsProps {
@@ -24,12 +24,13 @@ export function SidebarNavItems({ onNavigate }: SidebarNavItemsProps) {
 
   return (
     <nav className="flex flex-col gap-1 px-2">
-      {navItems.map(({ label, icon: Icon, path }) => (
+      {navItems.map(({ label, icon: Icon, path, tourId }) => (
         <NavLink
           key={path}
           to={path}
           end
           onClick={onNavigate}
+          data-tour={tourId}
           className={({ isActive }) => {
             const active = path === '/pipeline' ? isPipelineActive(path) : isActive;
             return cn(

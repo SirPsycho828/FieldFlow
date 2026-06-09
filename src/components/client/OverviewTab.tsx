@@ -155,14 +155,14 @@ export function OverviewTab({ client }: OverviewTabProps) {
             <div>
               <Label>Source</Label>
               <Select
-                value={form.watch('source') || ''}
-                onValueChange={(val) => form.setValue('source', val)}
+                value={form.watch('source') || '__none__'}
+                onValueChange={(val) => form.setValue('source', val === '__none__' ? '' : val)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select source" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {SOURCE_OPTIONS.map((s) => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}

@@ -52,11 +52,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useClient } from '@/hooks/useClient';
 import { StageSelector } from '@/components/shared/StageSelector';
 import { ClientSummaryStrip } from '@/components/client/ClientSummaryStrip';
+import { GuidanceTip } from '@/components/ux/GuidanceTip';
 import { OverviewTab } from '@/components/client/OverviewTab';
 import { NotesTab } from '@/components/client/NotesTab';
 import { FilesTab } from '@/components/client/FilesTab';
 import { InvoicesTab } from '@/components/client/InvoicesTab';
 import { MilestonesTab } from '@/components/client/MilestonesTab';
+import { STAGES, STAGE_LABELS } from '@/types';
 
 function chunkArray<T>(arr: T[], maxSize: number): T[][] {
   const chunks: T[][] = [];
@@ -335,6 +337,38 @@ export function ClientDetailPage() {
 
       {/* Summary strip */}
       <ClientSummaryStrip client={client} />
+
+      {/* Stage progress */}
+      {!isArchived && (
+        <div className="flex items-center gap-1 overflow-x-auto py-1">
+          {STAGES.map((stage, i) => {
+            const currentIdx = STAGES.indexOf(client.stage);
+            const isComplete = i < currentIdx;
+            const isCurrent = i === currentIdx;
+            return (
+              <div key={stage} className="flex items-center gap-1">
+                {i > 0 && (
+                  <div className={`h-px w-4 shrink-0 ${isComplete ? 'bg-primary' : 'bg-border'}`} />
+                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${
+                    isComplete ? 'bg-primary' : isCurrent ? 'border-2 border-primary' : 'bg-muted'
+                  }`} />
+                  <span className={`text-xs whitespace-nowrap ${
+                    isCurrent ? 'font-medium text-foreground' : 'text-muted-foreground'
+                  }`}>
+                    {STAGE_LABELS[stage]}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <GuidanceTip id="client-detail-tabs">
+        Use the tabs below to manage this client's details. Add notes during consultations, upload design files, create invoices for billing, and set milestones to track project deadlines.
+      </GuidanceTip>
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
