@@ -82,7 +82,7 @@ export function PipelinePage() {
     <div>
       <div className="flex items-center justify-between mb-2">
         <h1 className="font-heading text-2xl font-bold tracking-tight">Pipeline</h1>
-        <Button onClick={() => setAddOpen(true)}>
+        <Button data-tour="add-client" onClick={() => setAddOpen(true)}>
           <Plus className="h-4 w-4 mr-1" /> Add Client
         </Button>
       </div>
@@ -117,7 +117,7 @@ export function PipelinePage() {
       ) : (
         <>
           {/* Desktop: Kanban board */}
-          <div className="hidden md:block overflow-x-auto">
+          <div data-tour="pipeline-board" className="hidden md:block overflow-x-auto">
             <PipelineBoard clientsByStage={clientsByStage} />
           </div>
           {/* Mobile: Grouped list */}
