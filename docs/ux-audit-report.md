@@ -138,10 +138,12 @@ Gaps:
 | Settings | 4/5 | 5/5 | +1 |
 
 ### Summary
-- **Findings resolved:** 11/12 (UX-012 addressed by Phase 5 guidance improvements, onboarding wizard not warranted)
-- **Average page score:** 4.7/9 -> 6.3/9 (applicable pages only, excluding Landing/Login)
+- **Findings resolved:** 12/12
+- **Average page score:** 4.7/9 -> 7.0/9 (applicable pages only, excluding Landing/Login)
 - **Workflows fixed:** First-time setup (Bumpy -> Smooth), Pipeline lifecycle (Bumpy -> Smooth), Settings config (Bumpy -> Smooth)
 - **Components created:** GuidanceTip, StatusSummary, NextStepCard, PageIntro (in src/components/ux/)
-- **Onboarding:** Not applicable — app is simple enough (3 nav items, 1 entity type) that Phase 5 guidance addresses first-run orientation
-- **Pages modified:** 5 (PipelinePage, AddClientSheet, ClientDetailPage, SettingsPage, ArchivePage)
+- **Onboarding:** 4-step setup wizard (Welcome, Business Profile, First Client, Done) + 5-stop site tour with custom tooltips
+- **Settings integration:** "Restart Setup Wizard" + "Replay App Tour" buttons in Settings > Onboarding
+- **Pages modified:** 7 (PipelinePage, AddClientSheet, ClientDetailPage, SettingsPage, ArchivePage, OnboardingPage [new], TourProvider [updated])
 - **Anti-pattern check:** All 8 anti-patterns verified clear
+- **Deployed:** https://fieldflow-crm-app.web.app
