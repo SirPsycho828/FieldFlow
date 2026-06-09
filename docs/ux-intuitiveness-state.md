@@ -81,13 +81,40 @@
 - `src/components/settings/SettingsPage.tsx` — Added PageIntro, GuidanceTip explaining section impacts
 - `src/components/archive/ArchivePage.tsx` — Added client count, PageIntro, GuidanceTip for restore vs delete
 
-## Phase 6 (Onboarding) — Complete (skipped)
-- [x] Step 1: Assess need
-- [ ] Steps 2-8: skipped — neither setup wizard nor app tour warranted
-- [x] Step 9: Update state
-- [x] Step 10: Load Phase 7
+## Phase 6 (Onboarding) — Complete
+- [x] Step 1: Fetch library docs (React Joyride already installed, CSS animations for wizard)
+- [x] Step 2: Design setup wizard (4 steps: Welcome, Business Profile, First Client, Done)
+- [x] Step 3: Design app tour (5 stops, already built in prior commit)
+- [x] Step 4: Design settings integration (Onboarding card with both restart buttons)
+- [x] Step 5: Implement setup wizard (`src/pages/OnboardingPage.tsx`)
+- [x] Step 6: Implement site tour (existing `src/components/ux/TourProvider.tsx`)
+- [x] Step 7: Implement settings integration (Onboarding section in SettingsPage)
+- [x] Step 8: Verify build (tsc --noEmit clean)
+- [x] Step 9: Commit
+- [x] Step 10: Update state
+- [x] Step 11: Load Phase 7
 
-Reason: App has only 3 top-level nav items and requires a single entity (client) to be useful. Phase 5 GuidanceTips, PageIntros, and improved EmptyStates provide adequate first-run orientation without dedicated onboarding.
+### Wizard Steps
+1. **Welcome** — greeting, preview of 2 setup steps, ~1 min estimate
+2. **Business Profile** — name, email, phone → saved to Firestore `businessProfile`
+3. **First Client** — name, stage, source → creates real client in pipeline
+4. **Done** — celebration, summary, triggers app tour on pipeline
+
+### Tour Stops (5)
+1. Pipeline nav → "Your Client Pipeline"
+2. Add Client button → "Add New Clients"
+3. Pipeline board → "Drag to Advance"
+4. Archive nav → "Client Archive"
+5. Settings nav → "Business Settings"
+
+### Settings Controls
+- "Restart Setup Wizard" → resets onboarding metadata, navigates to `/onboarding`
+- "Replay App Tour" → clears tour localStorage, starts tour on pipeline
+
+### State Management
+- Wizard: Firestore `users/{uid}/metadata/onboarding` doc (wizardCompleted, wizardStepsCompleted, wizardSkippedSteps, completedAt)
+- Tour: localStorage `fieldflow-tour-completed` / `fieldflow-tour-pending`
+- Existing user backfill: auto-marks wizardCompleted if businessProfile.name exists
 
 ## Components Created
 - `src/components/ux/GuidanceTip.tsx` — Dismissible contextual help (localStorage persistence)
