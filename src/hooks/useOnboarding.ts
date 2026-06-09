@@ -21,10 +21,13 @@ export function useOnboarding() {
   const { user, userDoc, loading: authLoading } = useAuth();
 
   // Read onboarding state from the user document (real-time via AuthContext)
-  const onboarding: OnboardingState = (userDoc as Record<string, unknown>)?.onboarding as OnboardingState ?? DEFAULT_STATE;
+  const rawOnboarding = (userDoc as Record<string, unknown>)?.onboarding as OnboardingState | undefined;
+  const onboarding: OnboardingState = rawOnboarding ?? DEFAULT_STATE;
 
-  // Backfill: existing users with a business profile name are treated as wizard-complete
-  const wizardCompleted = onboarding.wizardCompleted || !!userDoc?.businessProfile?.name;
+  // Backfill: existing users created before the wizard was added (no onboarding field)
+  // are auto-completed so they skip the wizard. Also covers users with a business profile.
+  const isPreWizardUser = userDoc != null && rawOnboarding === undefined;
+  const wizardCompleted = onboarding.wizardCompleted || isPreWizardUser || !!userDoc?.businessProfile?.name;
 
   const userRef = user ? doc(db, 'users', user.uid) : null;
 

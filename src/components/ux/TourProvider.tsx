@@ -160,7 +160,9 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Auto-start tour when landing on /pipeline for the first time (or after replay)
+  // Primary trigger: auto-start for ANY user who has never completed the tour.
+  // This fires for new users after the wizard AND existing users on their next visit.
+  // Secondary trigger: the pending flag from scheduleTour() (wizard done step, replay button).
   useEffect(() => {
     if (location.pathname !== '/pipeline') return;
 
@@ -169,7 +171,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
 
     if (!completed || pending) {
       localStorage.removeItem(TOUR_PENDING_KEY);
-      const timer = setTimeout(() => setRun(true), 700);
+      const timer = setTimeout(() => setRun(true), 800);
       return () => clearTimeout(timer);
     }
   }, [location.pathname]);
