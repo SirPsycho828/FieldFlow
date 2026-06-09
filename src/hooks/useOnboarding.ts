@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useCallback } from 'react';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -18,106 +18,53 @@ const DEFAULT_STATE: OnboardingState = {
 };
 
 export function useOnboarding() {
-  const { user } = useAuth();
-  const [state, setState] = useState<OnboardingState>(DEFAULT_STATE);
-  const [loading, setLoading] = useState(true);
+  const { user, userDoc, loading: authLoading } = useAuth();
 
-  useEffect(() => {
-    if (!user) {
-      setState(DEFAULT_STATE);
-      setLoading(false);
-      return;
-    }
+  // Read onboarding state from the user document (real-time via AuthContext)
+  const onboarding: OnboardingState = (userDoc as Record<string, unknown>)?.onboarding as OnboardingState ?? DEFAULT_STATE;
 
-    let cancelled = false;
+  // Backfill: existing users with a business profile name are treated as wizard-complete
+  const wizardCompleted = onboarding.wizardCompleted || !!userDoc?.businessProfile?.name;
 
-    async function load() {
-      const ref = doc(db, 'users', user!.uid, 'metadata', 'onboarding');
-      const snap = await getDoc(ref);
+  const userRef = user ? doc(db, 'users', user.uid) : null;
 
-      if (cancelled) return;
-
-      if (snap.exists()) {
-        const data = snap.data() as OnboardingState;
-        setState(data);
-      } else {
-        // Check if this is an existing user (has clients or business profile)
-        // If so, auto-mark wizard as completed (backfill)
-        const userRef = doc(db, 'users', user!.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (cancelled) return;
-
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          const hasProfile = userData.businessProfile?.name;
-          // Existing users with a business profile are backfilled
-          if (hasProfile) {
-            const backfillState: OnboardingState = {
-              wizardCompleted: true,
-              wizardStepsCompleted: ['welcome', 'business-profile', 'first-client', 'done'],
-              wizardSkippedSteps: [],
-              completedAt: serverTimestamp(),
-            };
-            await setDoc(ref, backfillState);
-            setState({ ...backfillState, completedAt: new Date() });
-          } else {
-            setState(DEFAULT_STATE);
-          }
-        }
-      }
-
-      if (!cancelled) setLoading(false);
-    }
-
-    load();
-    return () => { cancelled = true; };
-  }, [user]);
-
-  async function completeStep(stepId: string) {
-    if (!user) return;
-    const ref = doc(db, 'users', user.uid, 'metadata', 'onboarding');
+  const completeStep = useCallback(async (stepId: string) => {
+    if (!userRef) return;
     const updated = {
-      ...state,
-      wizardStepsCompleted: [...new Set([...state.wizardStepsCompleted, stepId])],
+      ...onboarding,
+      wizardStepsCompleted: [...new Set([...onboarding.wizardStepsCompleted, stepId])],
     };
-    setState(updated);
-    await setDoc(ref, updated, { merge: true });
-  }
+    await updateDoc(userRef, { onboarding: updated });
+  }, [userRef, onboarding]);
 
-  async function skipStep(stepId: string) {
-    if (!user) return;
-    const ref = doc(db, 'users', user.uid, 'metadata', 'onboarding');
+  const skipStep = useCallback(async (stepId: string) => {
+    if (!userRef) return;
     const updated = {
-      ...state,
-      wizardSkippedSteps: [...new Set([...state.wizardSkippedSteps, stepId])],
+      ...onboarding,
+      wizardSkippedSteps: [...new Set([...onboarding.wizardSkippedSteps, stepId])],
     };
-    setState(updated);
-    await setDoc(ref, updated, { merge: true });
-  }
+    await updateDoc(userRef, { onboarding: updated });
+  }, [userRef, onboarding]);
 
-  async function completeWizard() {
-    if (!user) return;
-    const ref = doc(db, 'users', user.uid, 'metadata', 'onboarding');
+  const completeWizard = useCallback(async () => {
+    if (!userRef) return;
     const updated: OnboardingState = {
-      ...state,
+      ...onboarding,
       wizardCompleted: true,
       completedAt: serverTimestamp(),
     };
-    setState({ ...updated, completedAt: new Date() });
-    await setDoc(ref, updated);
-  }
+    await updateDoc(userRef, { onboarding: updated });
+  }, [userRef, onboarding]);
 
-  async function resetWizard() {
-    if (!user) return;
-    const ref = doc(db, 'users', user.uid, 'metadata', 'onboarding');
-    setState(DEFAULT_STATE);
-    await setDoc(ref, DEFAULT_STATE);
-  }
+  const resetWizard = useCallback(async () => {
+    if (!userRef) return;
+    await updateDoc(userRef, { onboarding: DEFAULT_STATE });
+  }, [userRef]);
 
   return {
-    ...state,
-    loading,
+    ...onboarding,
+    wizardCompleted,
+    loading: authLoading,
     completeStep,
     skipStep,
     completeWizard,

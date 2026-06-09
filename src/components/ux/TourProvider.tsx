@@ -20,6 +20,7 @@ const tourSteps: Step[] = [
     content:
       'All your clients live here, organized by project stage — from first lead to completed installation.',
     placement: 'right',
+    skipBeacon: true,
   },
   {
     target: '[data-tour="add-client"]',
@@ -202,27 +203,16 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         run={run}
         steps={tourSteps}
         continuous
-        showSkipButton
         scrollToFirstStep
-        disableOverlayClose
         onEvent={handleEvent}
         tooltipComponent={TourTooltip}
-        styles={{
-          options: {
-            zIndex: 10000,
-            arrowColor: 'hsl(var(--card))',
-          },
-          overlay: {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          },
-        }}
-        floaterProps={{
-          styles: {
-            arrow: {
-              length: 8,
-              spread: 16,
-            },
-          },
+        options={{
+          skipBeacon: true,
+          buttons: ['back', 'skip', 'close', 'primary'],
+          overlayClickAction: false,
+          zIndex: 10000,
+          overlayColor: 'rgba(0, 0, 0, 0.5)',
+          arrowColor: 'hsl(var(--card))',
         }}
       />
     </TourContext.Provider>
